@@ -7,18 +7,11 @@ my $svn_id;
 my $msg = '';
 
 while (<>) {
-    if ( m{^git-svn-id: .*?((tags|branches|trunk)/?([^@]*))@([^ ]*)} ) {
-	my $path =$1;
-	my $rev = $4;
-        if ( $path =~ m{^branches/(.*?)(/trunk)?$} ) {
-	    $path = $1;
-	} elsif( $path=~ m{^tags/(.*)} ) {
-	    $path = $1;
+	if ( /^git-svn-id: (.*)/ ) {
+		$svn_id = $1;
+	} else {
+		$msg .= $_;
 	}
-	$msg .= "git-svn-short-id: ".$path."@".$rev."\n";
-    } else {
-	$msg .= $_;
-    }
 }
 
 # if this is a merge commit, rewrite the message to have a better "subject"

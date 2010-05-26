@@ -26,7 +26,10 @@ In brief:
    (might not be necessary with the svn-merge-attrs branch).
    This is just if you have any svn merges that occurred between branches.
 
-4. Run `git-svn-abandon-cleanup`
+4. If you want to retain the map of svn-rev to git-commit, run
+   `git-svn-abandon-make-svn-refs`.
+
+5. Run `git-svn-abandon-cleanup`
 
 The resulting repository should have only `refs/heads/*` and tags.
 All svn tags are recreated as annotated tags.
@@ -35,6 +38,13 @@ All svn tags are recreated as annotated tags.
 
 When you have a merge commit that is not recognized as such, the grafts file
 can be used to add additional parents, preserving history information.
+
+If you chose to retain the svn revision mapping, you can reference
+svn revisions as follows: `git show svn/r1234`, `git log svn/r1234`, etc.
+Otherwise, these revisions are invisible to `git branch -a`, 
+`git tag -l`, and `git for-each-ref`.  These refs do not travel with 
+git push / git pull, so be prepared to transfer them out-of-band
+
 
 Troubleshooting:
 =======
@@ -66,3 +76,6 @@ clean a history as possible. Maintenance is just like a normal git repository.
 After `git svn-abandon-cleanup` has been run, `git svn rebase` can't be run
 anymore, so you can't bring it up to date without keeping the old SVN repo
 around and grafting things to the conversion.
+
+If you maintained the svn revision map, then after running
+`git svn-abandon-cleanup`, any history rewriting will orphan the svn refs

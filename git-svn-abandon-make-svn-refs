@@ -1,0 +1,11 @@
+#!/bin/sh
+
+mkdir -p .git/svn
+
+for commit_hash in $( git rev-list --all ); do
+    svn_rev=$( git log -1 $commit_hash | grep git-svn-id | sed 's/.*@//' | sed 's/ .*//' )
+    if [ "$svn_rev" != "" ]; then
+	echo "$commit_hash" > .git/svn/r$svn_rev
+	echo "Recording r$svn_rev -> $commit_hash"
+    fi
+done
