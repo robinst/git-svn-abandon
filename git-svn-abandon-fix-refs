@@ -19,10 +19,16 @@ git for-each-ref --format='%(refname)' refs/remotes/svn/tags/* | while read tag_
     # if this ancestor is in trunk then we can just tag it
     # otherwise the tag has diverged from trunk and it's actually more like a
     # branch than a tag
-    merge=$( git merge-base "refs/remotes/svn/trunk" $parent );
-    if [ "$merge" = "$parent" ]; then
-        target_ref=$parent
-    else
+    target_ref="";
+
+    for branch_ref in $( git for-each-ref --format='%(refname)' refs/remotes/svn/* ); do
+	merge=$( git merge-base $branch_ref $parent );
+	if [ "$merge" = "$parent" ]; then
+            target_ref=$parent
+	    break
+	fi
+    done
+    if [ "$target_ref" == "" ]; then
         echo "tag has diverged: $tag"
         target_ref="$tag_ref"
     fi
