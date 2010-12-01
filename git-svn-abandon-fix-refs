@@ -55,11 +55,28 @@ done
 git checkout trunk
 git branch -M trunk master
 
+
 # remove merged branches
-git for-each-ref --format='%(refname)' refs/heads | while read branch; do
+for branch in $( git for-each-ref --format='%(refname)' refs/heads ); do
     git rev-parse --quiet --verify "$branch" || continue # make sure it still exists
     git symbolic-ref HEAD "$branch"
-    git branch -d $( git branch --merged | grep -v '^\*' )
+    for mergedBranch in $( git branch --merged | grep -v '^\*' ); do
+	isSaved=0
+	for (( x=0 ; x < ${#SavedBranches[@]}; x++ )); do
+	    if [ "$mergedBranch" == "${SavedBranches[$x]}" ]; then
+		isSaved=1
+	    fi
+	done
+
+	if [ $isSaved -eq 0 ]; then
+	    read -p "Delete branch reference \"$mergedBranch\" which has been merged into \"$branch\" (y/[n])? " REPLY
+	    if [ "$REPLY" == "y" ]; then
+		git branch -d $mergedBranch
+	    else
+		SavedBranches[${#SavedBranches[@]}]="$mergedBranch"
+	    fi
+	fi
+    done
 done
 
 git checkout master
