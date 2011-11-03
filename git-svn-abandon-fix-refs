@@ -11,7 +11,7 @@ git for-each-ref --format='%(refname)' refs/remotes/svn/tags/* | while read tag_
 
     # find the oldest ancestor for which the tree is the same
     parent_ref="$tag_ref";
-    while [ $( git rev-parse --quiet --verify "$parent_ref"^: ) = "$tree" ]; do
+    while [ "$( git rev-parse --quiet --verify "$parent_ref"^: )" = "$tree" ]; do
         parent_ref="$parent_ref"^
     done
     parent=$( git rev-parse "$parent_ref" );
@@ -39,7 +39,7 @@ git for-each-ref --format='%(refname)' refs/remotes/svn/tags/* | while read tag_
     env GIT_COMMITTER_NAME="$(  git show -s --pretty='format:%an' "$tag_ref" )" \
         GIT_COMMITTER_EMAIL="$( git show -s --pretty='format:%ae' "$tag_ref" )" \
         GIT_COMMITTER_DATE="$(  git show -s --pretty='format:%ad' "$tag_ref" )" \
-        git tag -a -F - "$tag" "$target_ref"
+	git tag -a -F - "$(echo $tag | sed 's/%7E/./g')" "$target_ref"
 
     git update-ref -d "$tag_ref"
 done
@@ -47,7 +47,7 @@ done
 # create local branches out of svn branches
 git for-each-ref --format='%(refname)' refs/remotes/svn/ | while read branch_ref; do
     branch=${branch_ref#refs/remotes/svn/}
-    git branch "$branch" "$branch_ref"
+    git branch "$(echo $branch | sed 's/%7E/./g')" "$branch_ref"
     git update-ref -d "$branch_ref"
 done
 
